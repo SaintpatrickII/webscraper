@@ -6,7 +6,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 import uuid
 import json
-from webdriver_manager.chrome import ChromeDriverManager
 
 
 
@@ -39,7 +38,7 @@ class Webscraper:
         
         sleep(2)
         coin_container = self.driver.find_element_by_xpath('//table[@class="h7vnx2-2 czTsgW cmc-table  "]')
-        coin_list = coin_container.find_elements_by_xpath('./tbody')
+        coin_list = coin_container.find_elements_by_xpath('./tbody/tr')
         return coin_list
 
     """
@@ -57,39 +56,46 @@ class Webscraper:
         coin_list = self.individual_coin_path()
         self.link_list = []
         sleep(2)
-        i= 0
-
+        driver = self.driver
+        i = 1
         for coin in coin_list:
+            wait = WebDriverWait(driver, 10)
+            wait.until(EC.visibility_of_element_located(By.XPATH,'//*[@id="__next"]/div/div[1]/div[2]/div/div/div[5]/table/tbody/tr'))
+            #WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located(By.XPATH,'//*[@id="__next"]/div/div[1]/div[2]/div/div/div[5]/table/tbody/tr'))
+            
+
             # while i <= 100:
-            while (coin.find_elements_by_xpath('./tr//td[3]/div/a/div/div/div/p')) == True:
-                    full_coin_list= [{
-                        'uuid' : str(uuid.uuid4()),
-                        'Name': coin.find_element_by_xpath('.//tr//td[3]//a//p').text,
-                        'Symbol' : coin.find_element_by_xpath('.//tr//td[3]/div/a/div/div/div/p').text,
-                        'Price' : coin.find_element_by_xpath('.//tr//td[4]/div/a/span').text,
-                        'Volume' :coin.find_element_by_xpath('.//tr//td[8]/div/a/p').text,
-                        'Market_cap' : coin.find_element_by_xpath('.//tr//td//p/span[2]').text,
-                        'Circulating_Supply' : coin.find_element_by_xpath('./tr//td[9]//div/div[1]/p').text
-                    }] #for coin in coin_list]
-                    i += 1
-                    print(coin_list)
-                
-            else:
-                self.driver.execute_script("window.scrollBy(0, 700)")
-                sleep(3)
-                full_coin_list= [{
-                    'uuid' : str(uuid.uuid4()),
-                    'Name': coin.find_element_by_xpath('.//tr//td[3]//a//p').text,
-                    'Symbol' : coin.find_element_by_xpath('.//tr//td[3]/div/a/div/div/div/p').text,
-                    'Price' : coin.find_element_by_xpath('.//tr//td[4]/div/a/span').text,
-                    'Volume' :coin.find_element_by_xpath('.//tr//td[8]/div/a/p').text,
-                    'Market_cap' : coin.find_element_by_xpath('.//tr//td//p/span[2]').text,
-                    'Circulating_Supply' : coin.find_element_by_xpath('./tr//td[9]//div/div[1]/p').text
-                }] #for coin in coin_list]
-                i += 1
-            self.link_list.append(full_coin_list)
+            # while (coin.find_elements_by_xpath('.//tr[i]//td[3]/div/a/div/div/div/p')) == False:
+            full_coin_list= [{
+                'uuid' : str(uuid.uuid4()),
+                'Name': coin.find_element_by_xpath('.//td[3]//a//p').text,
+                'Symbol' : coin.find_element_by_xpath('.//td[3]/div/a/div/div/div/p').text,
+                'Price' : coin.find_element_by_xpath('.//td[4]/div/a/span').text,
+                'Volume' :coin.find_element_by_xpath('.//td[8]/div/a/p').text,
+                'Market_cap' : coin.find_element_by_xpath('.//td//p/span[2]').text,
+                'Circulating_Supply' : coin.find_element_by_xpath('.//td[9]//div/div[1]/p').text
+            }] #for coin in coin_list]
+            i += 1
+            self.driver.execute_script("window.scrollBy(0, 300)")
+            sleep(3)
             print(full_coin_list)
-        return full_coin_list
+            return full_coin_list
+            # else:
+            #     self.driver.execute_script("window.scrollBy(0, 300)")
+            #     sleep(5)
+            #     full_coin_list= [{
+            #         'uuid' : str(uuid.uuid4()),
+            #         'Name': coin.find_element_by_xpath('.//td[3]//a//p').text,
+            #         'Symbol' : coin.find_element_by_xpath('.//td[3]/div/a/div/div/div/p').text,
+            #         'Price' : coin.find_element_by_xpath('.//td[4]/div/a/span').text,
+            #         'Volume' :coin.find_element_by_xpath('.//td[8]/div/a/p').text,
+            #         'Market_cap' : coin.find_element_by_xpath('.//td//p/span[2]').text,
+            #         'Circulating_Supply' : coin.find_element_by_xpath('.//td[9]//div/div[1]/p').text
+            #     }] #for coin in coin_list]
+            #     i += 1
+            # self.link_list.append(full_coin_list)
+            # print(full_coin_list)
+            #return full_coin_list
 
     """
     Crypto Properties
@@ -186,12 +192,15 @@ class public_Webscraper(Webscraper):
     1000 coins on coinmarketcap.com
     """
 
+if __name__ == '__main__':
+    print(Webscraper())
+else:
+    print('the webscraper module has been imported')
 
 private_Webscraper = Webscraper()
 coin_public_webscraper = public_Webscraper()
-#coin_public_webscraper.page_iterator(11)
-#final_coin_list = coin_public_webscraper.scroller()
+
 full_iteration = coin_public_webscraper.page_iterator(10)
 coin_public_webscraper.page_iterator(10)
 print(full_iteration)
-#public_Webscraper.save_to_json(self)
+
