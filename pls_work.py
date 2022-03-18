@@ -7,11 +7,13 @@ from selenium.webdriver.support import expected_conditions as EC
 import uuid
 import json
 import urllib.request
+from selenium.common.exceptions import NoSuchElementException
 
 
 class Webscraper:
     def __init__(self):
         self.link_list = []
+        self.coin_completed = []
         self.driver = webdriver.Chrome('/Users/paddy/Downloads/chromedriver')
         self.driver.get('https://coinmarketcap.com/')
         self.url = 'https://coinmarketcap.com/'
@@ -42,33 +44,36 @@ class Webscraper:
         self.driver.execute_script("document.body.style.zoom='50%'")
         print(len(coin_list))
         for i in range(len(coin_list)):
-            full_coin_list= [{
-                'uuid' : str(uuid.uuid4()),
-                
-                'Name': coin_list[i].find_element_by_xpath('.//td[3]//a//p').text,
-                'Symbol' : coin_list[i].find_element_by_xpath('.//td[3]/div/a/div/div/div/p').text,
-                'Price' : coin_list[i].find_element_by_xpath('.//td[4]/div/a/span').text,
-                'Volume' :coin_list[i].find_element_by_xpath('.//td[8]/div/a/p').text,
-                'Market_cap' : coin_list[i].find_element_by_xpath('.//td//p/span[2]').text,
-                'Circulating_Supply' : coin_list[i].find_element_by_xpath('.//td[9]//div/div[1]/p').text
-            }]
+            try:
+                full_coin_list= [{
+                    'uuid' : str(uuid.uuid4()),
+                    
+                    'Name': coin_list[i].find_element_by_xpath('.//td[3]//a//p').text,
+                    'Symbol' : coin_list[i].find_element_by_xpath('.//td[3]/div/a/div/div/div/p').text,
+                    'Price' : coin_list[i].find_element_by_xpath('.//td[4]/div/a/span').text,
+                    'Volume' :coin_list[i].find_element_by_xpath('.//td[8]/div/a/p').text,
+                    'Market_cap' : coin_list[i].find_element_by_xpath('.//td//p/span[2]').text,
+                    'Circulating_Supply' : coin_list[i].find_element_by_xpath('.//td[9]//div/div[1]/p').text
+                }]
+            except NoSuchElementException:
+                    continue
             img = coin_list[i].find_element_by_class_name('coin-logo')
             src = img.get_attribute('src')
             coin_image = urllib.request.urlretrieve(src, "my_image.png")
             #i += 1
             print(full_coin_list)
             coin_list = self.individual_coin_path()
-            #WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located((By.XPATH,'//*[@id="__next"]/div/div[1]/div[2]/div/div/div[5]/table/tbody/tr')))
             self.driver.execute_script("window.scrollBy(0, 50)")
             self.link_list.extend(full_coin_list)
-            self.link_list.extend(coin_image)
+            self.coin_completed.extend([coin_image])
+            #self.coin_completed.extend([full_coin_list])
             if i == 100:
                 # self.link_list.extend(full_coin_list)
                 # self.link_list.extend(coin_image)
                 self.save_to_json()
                 return full_coin_list
-            # self.driver.execute_script("window.scrollBy(0, 300)")
-            #
+        # self.driver.execute_script("window.scrollBy(0, 300)")
+        #
 
 
 
@@ -97,11 +102,10 @@ class Webscraper:
             next_page_button.click()
             page += 1
             if page == no_of_pages:
-                self.save_to_json()
-        return 
+                #self.save_to_json()
+                return 
 
 
-
-public_webscraper = Webscraper()
-
-public_webscraper.page_iterator(10)
+if __name__ == '__main__':
+    public_webscraper = Webscraper()
+    public_webscraper.page_iterator(10)
