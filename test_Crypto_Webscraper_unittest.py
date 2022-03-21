@@ -1,28 +1,38 @@
 import unittest
-import Crypto_Webscraper_Final
+from pls_work import Webscraper
+
 
 
 class WebscraperTestCase(unittest.TestCase):
     def setUp(self):
-        self.scraper = Crypto_Webscraper_Final.Webscraper()
-        self.public_scraper = Crypto_Webscraper_Final.public_Webscraper()
+        self.scraper = Webscraper()
+        
+        
+    #def test_individualCoinContainer(self):
+        actual_container = self.Webscraper.individual_coin_path
 
 
-    def testScrollerCheck(self):
-        actual_i = Crypto_Webscraper_Final.scroller()
-        expected_i = 100
-        self.assertEqual(expected_i, actual_i)
-        self.assertTrue(isinstance(self.scraper.crypto_properties, dict))
-        self.assertTrue(isinstance(self.scraper.crypto_properties["Name"], str))
-        self.assertSetEqual(set(self.scraper.crypto_properties.keys()), set(["Price", "Symbol", "Volume", "Market_Cap", "Circulating_Supply"]))
-        return
+    def test_cryptoProperties(self):
+        self.assertTrue(isinstance(self.Webscraper.crypto_properties, dict))
+        self.assertTrue(isinstance(self.Webscraper.crypto_properties["Name"], str))
+        self.assertSetEqual(set(self.Webscraper.crypto_properties.keys()), set(["Price", "Symbol", "Volume", "Market_Cap", "Circulating_Supply"]))
+       
 
-    def testPageIterator(self):
+    def test_saveToJson(self):
         filepath = "/Users/paddy/opt/anaconda3/bin:/Users/paddy/opt/anaconda3/condabin:/Library/Frameworks/Python.framework/Versions/3.9/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin"
-        self.public_Wecraper.save_to_json(filepath)
+        self.public_Webcraper.save_to_json(filepath)
         self.writtenData = open(filepath, "r").read()
-        self.assertEqual(self.writtenData, self.scraper.save_to_json)
-        return
+        self.assertEqual(self.writtenData, self.Webscraper.save_to_json)
+
+    def test_pageIterator(self):
+        actual_i = Webscraper.page_iterator(11)
+        expected_i = 11
+        self.assertEqual(expected_i, actual_i)
+
+    def tearDown(self):
+        Webscraper.quit()
+    
+
 
 if __name__ == '__main__':
     #testing = unittest.TestLoader().loadTestsFromTestCase(WebscraperTestCase)
