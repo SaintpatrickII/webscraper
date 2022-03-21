@@ -47,7 +47,6 @@ class Webscraper:
             try:
                 full_coin_list= [{
                     'uuid' : str(uuid.uuid4()),
-                    
                     'Name': coin_list[i].find_element_by_xpath('.//td[3]//a//p').text,
                     'Symbol' : coin_list[i].find_element_by_xpath('.//td[3]/div/a/div/div/div/p').text,
                     'Price' : coin_list[i].find_element_by_xpath('.//td[4]/div/a/span').text,
@@ -59,18 +58,19 @@ class Webscraper:
                     continue
             img = coin_list[i].find_element_by_class_name('coin-logo')
             src = img.get_attribute('src')
-            coin_image = urllib.request.urlretrieve(src, "my_image.png")
+            coin_image = urllib.request.urlretrieve(src, "my_image.png" + str(coin_list[i].find_element_by_xpath('.//td[3]//a//p').text))
             #i += 1
             print(full_coin_list)
             coin_list = self.individual_coin_path()
             self.driver.execute_script("window.scrollBy(0, 50)")
             self.link_list.extend(full_coin_list)
             self.coin_completed.extend([coin_image])
+            self.save_to_json()
             #self.coin_completed.extend([full_coin_list])
             if i == 100:
                 # self.link_list.extend(full_coin_list)
                 # self.link_list.extend(coin_image)
-                self.save_to_json()
+                #self.save_to_json()
                 return full_coin_list
         # self.driver.execute_script("window.scrollBy(0, 300)")
         #
@@ -78,14 +78,17 @@ class Webscraper:
 
 
 
-    def scroller(self):
+    #def scroller(self):
         self.driver.execute_script("window.scrollBy(0, 300)")
 
     def save_to_json(self):
-            complete_full_coin_list = self.crypto_properties()
-            crypto_json = json.dumps(complete_full_coin_list)
-            with open('JSON_test.json', encoding='utf-8', mode='w') as file:
+            complete_full_coin_list = self.link_list
+            crypto_json = json.dumps(complete_full_coin_list,)
+            with open('JSON_pls.json', encoding='utf-8', mode='w') as file:
                 json.dump(crypto_json, file, ensure_ascii=False, indent=4)
+
+    #def save_image(self):
+        
 
 
 
@@ -108,4 +111,4 @@ class Webscraper:
 
 if __name__ == '__main__':
     public_webscraper = Webscraper()
-    public_webscraper.page_iterator(10)
+    public_webscraper.page_iterator(11)
