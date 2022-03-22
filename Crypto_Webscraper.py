@@ -8,7 +8,10 @@ import uuid
 import json
 import urllib.request
 from selenium.common.exceptions import NoSuchElementException
-
+import boto3
+import logging
+from botocore.exceptions import ClientError
+import os
 
 class Webscraper:
     def __init__(self):
@@ -23,16 +26,12 @@ class Webscraper:
         sleep(10)
 
 
-
-
     def individual_coin_path(self):
         
         sleep(2)
         coin_container = self.driver.find_element_by_xpath('//table[@class="h7vnx2-2 czTsgW cmc-table  "]')
         coin_list = coin_container.find_elements_by_xpath('./tbody/tr')
         return coin_list
-
-
 
 
     def crypto_properties(self):
@@ -59,27 +58,33 @@ class Webscraper:
                     continue
             img = coin_list[i].find_element_by_class_name('coin-logo')
             src = img.get_attribute('src')
-            coin_image = urllib.request.urlretrieve(src, '/Users/paddy/Desktop/AiCore/Scraper_Project/Coin_Images' + str(coin_list[i].find_element_by_xpath('.//td[3]//a//p').text) + "_image.png")
+            coin_image = urllib.request.urlretrieve(src, '/Users/paddy/Desktop/AiCore/Scraper_Project/Coin_Images/' + str(coin_list[i].find_element_by_xpath('.//td[3]//a//p').text) + "_image.png")
             #i += 1
             print(full_coin_list)
             coin_list = self.individual_coin_path()
             self.driver.execute_script("window.scrollBy(0, 50)")
+            # for coin in self.link_list:
+            #     if coin not in self.link_list:
+            #         self.link_list.extend(full_coin_list)
             self.link_list.extend(full_coin_list)
             self.coin_completed.extend([coin_image])
             self.save_to_json()
             if i == 100:
-                return full_coin_list
+                #self.save_to_json()
+                return full_coin_list()
 
 
     def save_to_json(self):
-            complete_full_coin_list = self.link_list
-            crypto_json = json.dumps(complete_full_coin_list,)
-            with open('JSON_pls.json', encoding='utf-8', mode='w') as file:
-                json.dump(crypto_json, file, ensure_ascii=False, indent=4)
+        final_coin_list = []
+        for coin in self.link_list:
+            if coin not in self.link_list:
+                final_coin_list.append(coin)
+        complete_full_coin_list = final_coin_list
+        crypto_json = json.dumps(complete_full_coin_list,)
+        with open('coins.json', encoding='utf-8', mode='a') as file:
+            json.dump(crypto_json, file, ensure_ascii=False, indent=4)
 
         
-
-
 
     def page_iterator(self, no_of_pages):
         sleep(5)
@@ -93,7 +98,28 @@ class Webscraper:
             next_page_button.click()
             page += 1
             if page == no_of_pages:
+                self.save_to_json()
                 return 
+
+
+    def save_to_s3(self):
+        s3_client = boto3.client('s3')
+        response = s3_client.upload_file('/Users/paddy/Desktop/AiCore/Scraper_Project/Coin_Images', 'patrickcryptobucket', 'coin_images')
+
+    def upload_file(file_name, bucket, object_name=None):
+
+    # If S3 object_name was not specified, use file_name
+        if object_name is None:
+            object_name = os.path.basename('coin_images')
+
+        # Upload the file
+        s3_client = boto3.client('s3')
+        try:
+            response = s3_client.upload_file('/Users/paddy/Desktop/AiCore/Scraper_Project/Coin_Images', 'patrickcryptobucket', 'coin_images')
+        except ClientError as e:
+            logging.error(e)
+            return False
+        return True
 
 
 if __name__ == '__main__':
