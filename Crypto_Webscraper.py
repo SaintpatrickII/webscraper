@@ -59,7 +59,7 @@ class Webscraper:
         i = 1
         self.driver.execute_script("window.scrollBy(0, 50)")
         self.driver.execute_script("document.body.style.zoom='50%'")
-        print(len(coin_list))
+        #print(len(coin_list))
         for i in range(len(coin_list)):
             try:
                 full_coin_list= [{
@@ -76,14 +76,10 @@ class Webscraper:
             img = coin_list[i].find_element_by_class_name('coin-logo')
             src = img.get_attribute('src')
             coin_image = urllib.request.urlretrieve(src, '/Users/paddy/Desktop/AiCore/Scraper_Project/Coin_Images/' + str(coin_list[i].find_element_by_xpath('.//td[3]//a//p').text) + "_image.png")
-            #i += 1
             print(full_coin_list)
+            self.link_list.append(full_coin_list)
             coin_list = self.individual_coin_path()
             self.driver.execute_script("window.scrollBy(0, 50)")
-            # for coin in self.link_list:
-            #     if coin not in self.link_list:
-            #         self.link_list.append(full_coin_list)
-            #self.link_list.extend(full_coin_list)
             self.save_to_json()
             self.coin_image_completed.extend([coin_image])
             if i == 100:
@@ -104,11 +100,11 @@ class Webscraper:
     def save_to_json(self):
         final_coin_list = []
         for coin in self.link_list:
-            if coin not in self.final_link_list:
+            if coin not in final_coin_list:
                 final_coin_list.append(coin)
         complete_full_coin_list = final_coin_list
         crypto_json = json.dumps(complete_full_coin_list,)
-        with open('coins.json', encoding='utf-8', mode='a') as file:
+        with open('coins.json', encoding='utf-8', mode='w') as file:
             json.dump(crypto_json, file, ensure_ascii=False, indent=4)
 
         
