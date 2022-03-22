@@ -15,7 +15,7 @@ import os
 
 class Webscraper:
     def __init__(self):
-        self.link_list = []
+        #self.link_list = []
         self.coin_completed = []
         self.driver = webdriver.Chrome('/Users/paddy/Downloads/chromedriver')
         self.driver.get('https://coinmarketcap.com/')
@@ -81,7 +81,7 @@ class Webscraper:
                 final_coin_list.append(coin)
         complete_full_coin_list = final_coin_list
         crypto_json = json.dumps(complete_full_coin_list,)
-        with open('coins.json', encoding='utf-8', mode='a') as file:
+        with open('coins.json', encoding='utf-8', mode='w') as file:
             json.dump(crypto_json, file, ensure_ascii=False, indent=4)
 
         
