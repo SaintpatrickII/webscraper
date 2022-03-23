@@ -62,7 +62,7 @@ class Webscraper:
         #print(len(coin_list))
         for i in range(len(coin_list)):
             try:
-                full_coin_list= [{
+                full_coin_list= {
                     'uuid' : str(uuid.uuid4()),
                     'Name': coin_list[i].find_element_by_xpath('.//td[3]//a//p').text,
                     'Symbol' : coin_list[i].find_element_by_xpath('.//td[3]/div/a/div/div/div/p').text,
@@ -70,7 +70,7 @@ class Webscraper:
                     'Volume' :coin_list[i].find_element_by_xpath('.//td[8]/div/a/p').text,
                     'Market_cap' : coin_list[i].find_element_by_xpath('.//td//p/span[2]').text,
                     'Circulating_Supply' : coin_list[i].find_element_by_xpath('.//td[9]//div/div[1]/p').text
-                }]
+                }
             except NoSuchElementException:
                     continue
             img = coin_list[i].find_element_by_class_name('coin-logo')
@@ -103,7 +103,7 @@ class Webscraper:
             if coin not in final_coin_list:
                 final_coin_list.append(coin)
         complete_full_coin_list = final_coin_list
-        crypto_json = json.dumps(complete_full_coin_list,)
+        crypto_json = json.dumps(complete_full_coin_list)
         with open('coins.json', encoding='utf-8', mode='w') as file:
             json.dump(crypto_json, file, ensure_ascii=False, indent=4)
 

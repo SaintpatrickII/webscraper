@@ -1,5 +1,6 @@
+
 import unittest
-from pls_work import Webscraper
+from Crypto_Webscraper import Webscraper
 
 
 
@@ -9,28 +10,29 @@ class WebscraperTestCase(unittest.TestCase):
         
         
     #def test_individualCoinContainer(self):
-        actual_container = self.Webscraper.individual_coin_path
+        #actual_container = self.Webscraper.individual_coin_path
 
 
-    def test_cryptoProperties(self):
-        self.assertTrue(isinstance(self.Webscraper.crypto_properties, dict))
-        self.assertTrue(isinstance(self.Webscraper.crypto_properties["Name"], str))
-        self.assertSetEqual(set(self.Webscraper.crypto_properties.keys()), set(["Price", "Symbol", "Volume", "Market_Cap", "Circulating_Supply"]))
-       
+    def testCryptoProperties(self):
+        self.assertTrue(isinstance(self.scraper.crypto_properties, list))
+        # self.assertTrue(isinstance(self.scraper.crypto_properties["Name"], str))
+        # self.assertSetEqual(set(self.scraper.crypto_properties.keys()), set(["uuid", "name", "Symbol", "Price",  "Volume", "Market_Cap", "Circulating_Supply"]))
+       #is list, is each element dict
 
-    def test_saveToJson(self):
-        filepath = "/Users/paddy/opt/anaconda3/bin:/Users/paddy/opt/anaconda3/condabin:/Library/Frameworks/Python.framework/Versions/3.9/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin"
-        self.public_Webcraper.save_to_json(filepath)
-        self.writtenData = open(filepath, "r").read()
-        self.assertEqual(self.writtenData, self.Webscraper.save_to_json)
+    #def testSaveToJson(self):
+        # filepath = "/Users/paddy/opt/anaconda3/bin:/Users/paddy/opt/anaconda3/condabin:/Library/Frameworks/Python.framework/Versions/3.9/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin"
+        # self.scraper.save_to_json()
+        # self.writtenData = open(filepath, "a").read()
+        # self.assertEqual(self.writtenData, self.scraper.save_to_json)
 
-    def test_pageIterator(self):
-        actual_i = Webscraper.page_iterator(11)
-        expected_i = 11
+    def testPageIterator(self):
+        actual_i = self.scraper.page_iterator(11)
+        expected_i = type(None)
+        #test NoneType
         self.assertEqual(expected_i, actual_i)
 
     def tearDown(self):
-        Webscraper.quit()
+        self.scraper.quit()
     
 
 
@@ -38,3 +40,4 @@ if __name__ == '__main__':
     #testing = unittest.TestLoader().loadTestsFromTestCase(WebscraperTestCase)
     unittest.main(verbosity=2)
     
+
