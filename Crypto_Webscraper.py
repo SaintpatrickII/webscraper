@@ -1,3 +1,6 @@
+from optparse import Values
+from tokenize import Name
+from numpy import full
 from selenium import webdriver
 import time
 from time import sleep
@@ -8,6 +11,7 @@ import uuid
 import json
 import urllib.request
 from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import StaleElementReferenceException
 import boto3
 import logging
 from botocore.exceptions import ClientError
@@ -73,6 +77,11 @@ class Webscraper:
                 }
             except NoSuchElementException:
                     continue
+            #except StaleElementReferenceException:
+               # continue
+
+            if coin_list[i] in full_coin_list.values():
+                continue
             img = coin_list[i].find_element_by_class_name('coin-logo')
             src = img.get_attribute('src')
             coin_image = urllib.request.urlretrieve(src, '/Users/paddy/Desktop/AiCore/Scraper_Project/Coin_Images/' + str(coin_list[i].find_element_by_xpath('.//td[3]//a//p').text) + "_image.png")
@@ -102,10 +111,12 @@ class Webscraper:
         for coin in self.link_list:
             if coin not in final_coin_list:
                 final_coin_list.append(coin)
+        
         complete_full_coin_list = final_coin_list
         crypto_json = json.dumps(complete_full_coin_list)
         with open('coins.json', encoding='utf-8', mode='w') as file:
             json.dump(crypto_json, file, ensure_ascii=False, indent=4)
+
 
         
     """
