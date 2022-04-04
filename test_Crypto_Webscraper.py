@@ -14,6 +14,7 @@ class TestWebscraper(unittest.TestCase):
         #self.coins_json
         with open('../Scraper_Project/coins.json', mode='r') as f:
             self.coins_json = json.load(f)
+        print(type(self.coins_json))
             #self.coins_json = print(f.read())
         
         
@@ -34,8 +35,8 @@ class TestWebscraper(unittest.TestCase):
     #    #is list, is each element dict
 
 
-    def test_is_json_list(self, setUp):
-        self.assertIsInstance(self.coins_json, dict)
+    def test_is_json_list(self):
+        self.assertIsInstance(self.coins_json, json)
 
     # def parse(filename):
     #     try: 
@@ -58,12 +59,13 @@ class TestWebscraper(unittest.TestCase):
     #     #test NoneType
     #     self.assertEqual(expected_i, actual_i)
 
-    def tearDown(self):
-        pass
+    # def tearDown(self):
+    #     pass
     #     self.scraper.quit()
     
 
 if __name__ == '__main__':
     #testing = unittest.TestLoader().loadTestsFromTestCase(WebscraperTestCase)
-    unittest.main(verbosity=2)
+    unittest.main(verbosity=2, exit=True)
+    
     

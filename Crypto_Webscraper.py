@@ -65,13 +65,11 @@ class Webscraper:
         self.driver.execute_script("window.scrollBy(0, 50)")
         self.driver.execute_script("document.body.style.zoom='50%'")
         #print(len(coin_list))
-        img = coin_list[i].find_elements_by_class_name('coin-logo')
         for i in range(len(coin_list)):
             try:
                 full_coin_list= {
                     'uuid' : str(uuid.uuid4()),
                     'Name': coin_list[i].find_element_by_xpath('.//td[3]//a//p').text,
-                    'img' : img.get_attribute('src'),
                     'Symbol' : coin_list[i].find_element_by_xpath('.//td[3]/div/a/div/div/div/p').text,
                     'Price' : coin_list[i].find_element_by_xpath('.//td[4]/div/a/span').text,
                     'Volume' :coin_list[i].find_element_by_xpath('.//td[8]/div/a/p').text,
@@ -83,8 +81,8 @@ class Webscraper:
             #except StaleElementReferenceException:
                # continue
             
-            # if coin_list[i] in full_coin_list.values():
-            #     continue
+            if coin_list[i] in full_coin_list.values():
+                continue
             # for i in range(len(coin_list)):
             #     try:
             #         img = coin_list[i].find_elements_by_class_name('coin-logo')
@@ -97,22 +95,22 @@ class Webscraper:
             #             # coin_list = self.individual_coin_path()
             #     self.image_srs_list.append(full_image_list)
             #     coin_list = self.individual_coin_path()
-            # img = coin_list[i].find_elements_by_class_name('coin-logo')
+            img = coin_list[i].find_element_by_class_name('coin-logo')
             # for image in img:
-            #     src = img.get_attribute('src')
+            src = img.get_attribute('src')
             #     self.image_srs_list.append(image.get_attribute('src'))
-            #     # coin_image = urllib.request.urlretrieve(src, '/Users/paddy/Desktop/AiCore/Scraper_Project/Coin_Images/' + str(coin_list[i].find_element_by_xpath('.//td[3]/div/a/div/div/div/p').text) + ".png")
-            # self.save_image_url()
+            coin_image = urllib.request.urlretrieve(src, '/Users/paddy/Desktop/AiCore/Scraper_Project/Coin_Images/' + str(coin_list[i].find_element_by_xpath('.//td[3]/div/a/div/div/div/p').text) + ".png")
+            #self.save_image_url()
             print(full_coin_list)
-            # print(self.image_srs_list)
+            #print(self.image_srs_list)
             self.link_list.append(full_coin_list)
             coin_list = self.individual_coin_path()
             #image_scraper = self.save_image_url()
             
             self.driver.execute_script("window.scrollBy(0, 50)")
             self.save_to_json()
-            # self.save_to_json_image()
-            # self.coin_image_completed.extend([coin_image])
+            #self.save_to_json_image()
+            self.coin_image_completed.extend([coin_image])
             # self.image_srs_list.append
             if i == 100:
                 #self.save_to_json()
@@ -142,23 +140,26 @@ class Webscraper:
 
 
         
-    # def save_image_url(self):
-    #     coin_list = self.individual_coin_path()
-    #     i = 1
-    #     for i in range(len(coin_list)):
-    #         try:
-    #             img = coin_list[i].find_elements_by_class_name('coin-logo')
-    #             for image in img:
-    #                 full_image_list = {
-    #                 'img' : image.get_attribute('src')
-    #                 }
-    #         except NoSuchElementException:
-    #                 continue
-    #                 # coin_list = self.individual_coin_path()
-    #         self.image_srs_list.append(full_image_list)
-    #         #print(full_image_list)
-    #     return
-        # self.image_srs_list
+    #def save_image_url(self):
+        # coin_list = self.individual_coin_path()
+        # i = 1
+        # for i in range(len(coin_list)):
+        #     try:
+        #         img = coin_list[i].find_elements_by_class_name('coin-logo')
+        #         for image in img:
+        #             full_image_list = {
+        #             'img' : image.get_attribute('src')
+        #             }
+        #     except NoSuchElementException:
+        #             continue
+        #     self.image_srs_list.append(full_image_list)
+        #     i +=1
+        #     return
+        #             # coin_list = self.individual_coin_path()
+        #     self.image_srs_list.append(full_image_list)
+        #     #print(full_image_list)
+        # return
+        # # self.image_srs_list
 
 
 
@@ -210,6 +211,33 @@ class Webscraper:
     
     input: no_of_pages = int
     """
+
+
+    def upload_to_s3(self, Coin_Images, patrickcryptobucket, object_name):
+        Coin_Images = '../Scraper_Project/Coin_Images'
+        if object_name is None:
+            object_name = os.path.basename(Coin_Images)
+        s3 = boto3.client('s3')
+        
+        #response = s3_client.upload_file('/Users/paddy/Desktop/AiCore/Scraper_Project/Coin_Images', patrickcryptobucket, coins_images)
+        # for i, png in enumerate(self.coin_image_completed()):
+        with open('coins_images', 'rb') as f:
+            s3.upload_fileobj(f, patrickcryptobucket, object_name)
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     # def save_to_s3(self):
     #     s3_client = boto3.client('s3')
