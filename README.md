@@ -21,11 +21,18 @@ after trial & error the best way to structure this would be within a dictionary 
 for each element in this list of dictionaries we would need to have identifiable bits of information.
 For this a UUID string was utilised to act as a global unique identifier, for a more obvious identifier 
 we also collected each coins name & symbol, which being cryptocurrency coins will always be unique
-other key information about coins was collected such as their market cap & price
+other key information about coins was collected such as their market cap & price.
+
+Some coins would have missing attributes such as a missing price, for these a NoSuchElementException was used to skip these results without crashing the webscraper
 
 These details were saved as a json file by creating a write method which used the json.dump() method, here it is important to note a funny setback, whilst attempting to test this json file json.dumps was used unnoticed so all testing methods was attempting to analyse a string object rather than the list of dictionaries intended
 
 Alongside this an additional mothod was used to save the image date for each coin, in this case the urlib import was used & using a combination of the images srs element with a '.png' string each image could be saved as a png within a seperate Coin_Images file.
 
+3. Documentation & testing
 
+As the code project had now reached a point whereas it was in a draft version with features working as intended docstrings are added to explain the use of each method, this would make it far easier to understand the logic & reproduce this webscraper,
 
+Now we have a output in the form of a json file with all of our results an aditional testing file could be created to ensure that for future runs any errors could be more easily traced back using the inbuilt unittest module, for the testing of this project we would only initilise a few tests, as more would be created as the project progressed, at the moment these tests checked that all dictionary keys existed, that the json file was a list & that inside of that list dictionaries existed
+
+4. Scalably Storing Data
