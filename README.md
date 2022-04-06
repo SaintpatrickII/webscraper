@@ -3,4 +3,29 @@
 Project with AiCore involved creating a Webscraper for coinmarketcap.com
 this Webscraper would scrape the various attributes of cryptocurrencies from the popular tracking website coinmarketcap.com
 
-Selenium was utilised for auto
+Selenium was utilised for automating the webscraper
+
+1. prototyping the webscraper:
+
+before being able to access the website a cokkies iframe had appeared, in the initiliser the webscraper was designed to immediateley click this so that the webpage could be manipulated
+
+The second hurdle in this project was creating a class which could navigate the website & swap inbetween webpages
+two key methods had been tested: scrolling until next element visable and scrolling by a certian pixel amount at this point both were viable options.
+
+In order to swap pages the webscraper also had to be able to have the next page button visable before attempting to click it.
+
+2. Retrieving details
+
+Now that the website could be successfully navigated i could begin the process of scraping data.
+after trial & error the best way to structure this would be within a dictionary comprehension.
+for each element in this list of dictionaries we would need to have identifiable bits of information.
+For this a UUID string was utilised to act as a global unique identifier, for a more obvious identifier 
+we also collected each coins name & symbol, which being cryptocurrency coins will always be unique
+other key information about coins was collected such as their market cap & price
+
+These details were saved as a json file by creating a write method which used the json.dump() method, here it is important to note a funny setback, whilst attempting to test this json file json.dumps was used unnoticed so all testing methods was attempting to analyse a string object rather than the list of dictionaries intended
+
+Alongside this an additional mothod was used to save the image date for each coin, in this case the urlib import was used & using a combination of the images srs element with a '.png' string each image could be saved as a png within a seperate Coin_Images file.
+
+
+
