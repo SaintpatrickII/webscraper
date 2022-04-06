@@ -134,9 +134,9 @@ class Webscraper:
                 final_coin_list.append(coin)
         
         complete_full_coin_list = final_coin_list
-        crypto_json = json.dumps(complete_full_coin_list)
+        # crypto_json = json.dump(complete_full_coin_list)
         with open('coins.json', encoding='utf-8', mode='w') as file:
-            json.dump(crypto_json, file, ensure_ascii=False, indent=4)
+            json.dump(complete_full_coin_list, file, ensure_ascii=False, indent=4)
 
 
         
@@ -213,16 +213,16 @@ class Webscraper:
     """
 
 
-    def upload_to_s3(self, Coin_Images, patrickcryptobucket, object_name):
-        Coin_Images = '../Scraper_Project/Coin_Images'
-        if object_name is None:
-            object_name = os.path.basename(Coin_Images)
-        s3 = boto3.client('s3')
+    # def upload_to_s3(self, Coin_Images, patrickcryptobucket, object_name):
+    #     Coin_Images = '../Scraper_Project/Coin_Images'
+    #     if object_name is None:
+    #         object_name = os.path.basename(Coin_Images)
+    #     s3 = boto3.client('s3')
         
-        #response = s3_client.upload_file('/Users/paddy/Desktop/AiCore/Scraper_Project/Coin_Images', patrickcryptobucket, coins_images)
-        # for i, png in enumerate(self.coin_image_completed()):
-        with open('coins_images', 'rb') as f:
-            s3.upload_fileobj(f, patrickcryptobucket, object_name)
+    #     #response = s3_client.upload_file('/Users/paddy/Desktop/AiCore/Scraper_Project/Coin_Images', patrickcryptobucket, coins_images)
+    #     # for i, png in enumerate(self.coin_image_completed()):
+    #     with open('coins_images', 'rb') as f:
+    #         s3.upload_fileobj(f, patrickcryptobucket, object_name)
 
     
 

@@ -1,7 +1,7 @@
 import unittest
-from Crypto_Webscraper import Webscraper
+# from Crypto_Webscraper import Webscraper
 import json
-from selenium import webdriver
+# from selenium import webdriver
 #from Scraper_Project import coins.json
 
 
@@ -13,11 +13,21 @@ class TestWebscraper(unittest.TestCase):
         #self.scraper_properties = Webscraper.crypto_properties(self)
         #self.coins_json
         with open('../Scraper_Project/coins.json', mode='r') as f:
-            self.coins_json = json.load(f)
-        print(type(self.coins_json))
+            self.coins_json_in_list = json.load(f)
+        print(type(self.coins_json_in_list))
+        self.coins_json = self.coins_json_in_list[3]
+        print(type(self.coins_json_in_list))
+
             #self.coins_json = print(f.read())
         
-        
+    def parse(filename):
+        filename = '../Scraper_Project/coins.json'
+        try:
+            with open(filename) as f:
+                return json.load(f)
+        except ValueError as e:
+            print('invalid json: %s' % e)
+            return None
     
         # self.assertTrue(isinstance(self.scraper.crypto_properties["Name"], str))
 
@@ -28,15 +38,15 @@ class TestWebscraper(unittest.TestCase):
     # def test_coin_path(self):
     #     self.coin_path()
 
-    #def testCryptoProperties(self):
-        #self.assertTrue(isinstance(self.scraper_properties, list))
-        # self.assertTrue(isinstance(self.scraper.crypto_properties["Name"], str))
-        # self.assertSetEqual(set(self.scraper.crypto_properties.keys()), set(["uuid", "name", "Symbol", "Price",  "Volume", "Market_Cap", "Circulating_Supply"]))
+    def test_keys(self):
+    #     # self.assertTrue(isinstance(self.scraper_properties, list))
+    #     # self.assertTrue(isinstance(self.scraper.crypto_properties["Name"], str))
+        self.assertSetEqual(set(self.coins_json.keys()), set(["uuid", "Name", "Symbol", "Price",  "Volume", "Market_cap", "Circulating_Supply"]))
     #    #is list, is each element dict
 
 
     def test_is_json_list(self):
-        self.assertIsInstance(self.coins_json, json)
+        self.assertIsInstance(self.coins_json, dict)
 
     # def parse(filename):
     #     try: 
