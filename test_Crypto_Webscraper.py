@@ -1,3 +1,5 @@
+from operator import contains
+from tkinter import Image
 import unittest
 # from Crypto_Webscraper import Webscraper
 import json
@@ -7,19 +9,14 @@ import json
 
 class TestWebscraper(unittest.TestCase):
     def setUp(self):
-        #self.driver = webdriver.Chrome('/Users/paddy/Downloads/chromedriver')
-        #self.driver.get('https://coinmarketcap.com/')
-        #self.coin_path = Webscraper.individual_coin_path(self)
-        #self.scraper_properties = Webscraper.crypto_properties(self)
-        #self.coins_json
         with open('../Scraper_Project/coins.json', mode='r') as f:
             self.coins_json_in_list = json.load(f)
-        print(type(self.coins_json_in_list))
-        self.coins_json = self.coins_json_in_list[3]
-        print(type(self.coins_json_in_list))
+        self.coins_json = self.coins_json_in_list
 
-            #self.coins_json = print(f.read())
-        
+        with open('../Scraper_Project/coins_images.json', mode='r') as f:
+            self.image_list = json.load(f)   
+    
+
     def parse(filename):
         filename = '../Scraper_Project/coins.json'
         try:
@@ -28,50 +25,44 @@ class TestWebscraper(unittest.TestCase):
         except ValueError as e:
             print('invalid json: %s' % e)
             return None
-    
-        # self.assertTrue(isinstance(self.scraper.crypto_properties["Name"], str))
-
-    #def test_individualCoinContainer(self):
-        #actual_container = self.Webscraper.individual_coin_path
 
 
-    # def test_coin_path(self):
-    #     self.coin_path()
+    def test_coins_json_list_of_dict(self):
+        self.assertIsInstance(self.coins_json, list)
+        print('coins.json is a list')
+        for k in self.coins_json:
+            self.assertIsInstance(k, dict)
+        print('coins.json has a dictionaries inside the lists')
+
+    def test_coins_images_list_of_dict(self):
+        self.assertIsInstance(self.image_list, list)
+        print('image_list is a list')
+        for k in self.image_list:
+            self.assertIsInstance(k, dict)
+        print('image_list has a dictionaries inside the lists')
+
 
     def test_keys(self):
-    #     # self.assertTrue(isinstance(self.scraper_properties, list))
-    #     # self.assertTrue(isinstance(self.scraper.crypto_properties["Name"], str))
-        self.assertSetEqual(set(self.coins_json.keys()), set(["uuid", "Name", "Symbol", "Price",  "Volume", "Market_cap", "Circulating_Supply"]))
-    #    #is list, is each element dict
+        for k in self.coins_json:
+            keys = k.keys()
+            keys_iterable = list(keys)
+            self.assertSetEqual(set(keys_iterable), set(["uuid", "Name", "Symbol", "Price",  "Volume", "Market_cap", "Circulating_Supply"]))
+        print('coins.json has the correct keys')
 
 
-    def test_is_json_list(self):
-        self.assertIsInstance(self.coins_json, dict)
+    def test_is_images_list(self):
+        dict_in_list = self.image_list
+        for i in dict_in_list:
+            v = i.values()
+            v_names = list(v)[1]
+            v_img_url = list(v)[2]
+            self.assertIsInstance(v_names and v_img_url, str)
+            self.assertEqual(v_img_url[0:51], 'https://s2.coinmarketcap.com/static/img/coins/64x64')
+        print('images have the correct url & names and url in string format ')
 
-    # def parse(filename):
-    #     try: 
-    #         with open(filename) as f:
-    #             return json.load(f)
-    #     except ValueError as e:
-    #             print('invalid json: %s' % e)
-    #     return None
 
-    
-    # #def testSaveToJson(self):
-    #     # filepath = "/Users/paddy/opt/anaconda3/bin:/Users/paddy/opt/anaconda3/condabin:/Library/Frameworks/Python.framework/Versions/3.9/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin"
-    #     # self.scraper.save_to_json()
-    #     # self.writtenData = open(filepath, "a").read()
-    #     # self.assertEqual(self.writtenData, self.scraper.save_to_json)
-
-    # def testPageIterator(self):
-    #     actual_i = self.scraper.page_iterator(11)
-    #     expected_i = type(None)
-    #     #test NoneType
-    #     self.assertEqual(expected_i, actual_i)
-
-    # def tearDown(self):
-    #     pass
-    #     self.scraper.quit()
+    def tearDown(self):
+        pass
     
 
 if __name__ == '__main__':
