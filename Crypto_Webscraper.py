@@ -1,20 +1,16 @@
-from optparse import Values
-from tokenize import Name
-from numpy import full
 from selenium import webdriver
-import time
 from time import sleep
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 import uuid
 import json
-import urllib.request
+# import urllib.request
 from selenium.common.exceptions import NoSuchElementException
-from selenium.common.exceptions import StaleElementReferenceException
+# from selenium.common.exceptions import StaleElementReferenceException
 import boto3
 import logging
-from botocore.exceptions import ClientError
+# from botocore.exceptions import ClientError
 import os
 
 class Webscraper:
@@ -64,7 +60,6 @@ class Webscraper:
         i = 1
         self.driver.execute_script("window.scrollBy(0, 50)")
         self.driver.execute_script("document.body.style.zoom='50%'")
-        #print(len(coin_list))
         for i in range(len(coin_list)):
             try:
                 full_coin_list= {
@@ -77,7 +72,6 @@ class Webscraper:
                     'Circulating_Supply' : coin_list[i].find_element_by_xpath('.//td[9]//div/div[1]/p').text
                 }
                 img = coin_list[i].find_element_by_class_name('coin-logo')
-                img_attribute = img.get_attribute('src')
                 full_image_list = {
                         'uuid' : str(uuid.uuid4()),
                         'Name': coin_list[i].find_element_by_xpath('.//td[3]//a//p').text,
@@ -85,20 +79,9 @@ class Webscraper:
                         }
             except NoSuchElementException:
                     continue
-            #except StaleElementReferenceException:
-               # continue
-            
             if coin_list[i] in full_coin_list.values():
                 continue
-            # for i in range(len(coin_list)):
-            #     try:
-                    
-            #         for img_attribute in img:
-                        
-            #     except NoSuchElementException:
-            #             continue
-                        # coin_list = self.individual_coin_path()
-                #self.image_srs_list.append(full_image_list)
+            
                 coin_list = self.individual_coin_path()
             # img = coin_list[i].find_element_by_class_name('coin-logo')
             # # for image in img:
@@ -145,26 +128,7 @@ class Webscraper:
 
 
         
-    #def save_image_url(self):
-        # coin_list = self.individual_coin_path()
-        # i = 1
-        # for i in range(len(coin_list)):
-        #     try:
-        #         img = coin_list[i].find_elements_by_class_name('coin-logo')
-        #         for image in img:
-        #             full_image_list = {
-        #             'img' : image.get_attribute('src')
-        #             }
-        #     except NoSuchElementException:
-        #             continue
-        #     self.image_srs_list.append(full_image_list)
-        #     i +=1
-        #     return
-        #             # coin_list = self.individual_coin_path()
-        #     self.image_srs_list.append(full_image_list)
-        #     #print(full_image_list)
-        # return
-        # # self.image_srs_list
+    
 
 
 
@@ -218,50 +182,7 @@ class Webscraper:
     """
 
 
-    # def upload_to_s3(self, Coin_Images, patrickcryptobucket, object_name):
-    #     Coin_Images = '../Scraper_Project/Coin_Images'
-    #     if object_name is None:
-    #         object_name = os.path.basename(Coin_Images)
-    #     s3 = boto3.client('s3')
-        
-    #     #response = s3_client.upload_file('/Users/paddy/Desktop/AiCore/Scraper_Project/Coin_Images', patrickcryptobucket, coins_images)
-    #     # for i, png in enumerate(self.coin_image_completed()):
-    #     with open('coins_images', 'rb') as f:
-    #         s3.upload_fileobj(f, patrickcryptobucket, object_name)
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    # def save_to_s3(self):
-    #     s3_client = boto3.client('s3')
-    #     response = s3_client.upload_file('/Users/paddy/Desktop/AiCore/Scraper_Project/Coin_Images', 'patrickcryptobucket', 'coin_images')
-
-    # def upload_file(file_name, bucket, object_name=None):
-
-    # # If S3 object_name was not specified, use file_name
-    #     if object_name is None:
-    #         object_name = os.path.basename('coin_images')
-
-    #     # Upload the file
-    #     s3_client = boto3.client('s3')
-    #     try:
-    #         response = s3_client.upload_file('/Users/paddy/Desktop/AiCore/Scraper_Project/Coin_Images', 'patrickcryptobucket', 'coin_images')
-    #     except ClientError as e:
-    #         logging.error(e)
-    #         return False
-    #     return True
+   
 
 
 if __name__ == '__main__':
@@ -269,4 +190,3 @@ if __name__ == '__main__':
     public_webscraper.page_iterator(11)
 
 
-    #str(coin_list[i].find_element_by_xpath('.//td[3]/div/a/div/div/div/p').text))
