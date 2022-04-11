@@ -21,7 +21,7 @@ class Webscraper:
     def __init__(self):
         self.link_list = []
         self.coin_image_completed = []
-        self.image_srs_list = []
+        #self.image_srs_list = []
         self.driver = webdriver.Chrome('/Users/paddy/Downloads/chromedriver')
         self.driver.get('https://coinmarketcap.com/')
         self.url = 'https://coinmarketcap.com/'
@@ -76,6 +76,13 @@ class Webscraper:
                     'Market_cap' : coin_list[i].find_element_by_xpath('.//td//p/span[2]').text,
                     'Circulating_Supply' : coin_list[i].find_element_by_xpath('.//td[9]//div/div[1]/p').text
                 }
+                img = coin_list[i].find_element_by_class_name('coin-logo')
+                img_attribute = img.get_attribute('src')
+                full_image_list = {
+                        'uuid' : str(uuid.uuid4()),
+                        'Name': coin_list[i].find_element_by_xpath('.//td[3]//a//p').text,
+                        'Image' : img.get_attribute('src')
+                        }
             except NoSuchElementException:
                     continue
             #except StaleElementReferenceException:
@@ -85,21 +92,19 @@ class Webscraper:
                 continue
             # for i in range(len(coin_list)):
             #     try:
-            #         img = coin_list[i].find_elements_by_class_name('coin-logo')
-            #         for image in img:
-            #             full_image_list = {
-            #             'img' : image.get_attribute('src')
-            #             }
+                    
+            #         for img_attribute in img:
+                        
             #     except NoSuchElementException:
             #             continue
-            #             # coin_list = self.individual_coin_path()
-            #     self.image_srs_list.append(full_image_list)
-            #     coin_list = self.individual_coin_path()
-            img = coin_list[i].find_element_by_class_name('coin-logo')
-            # for image in img:
-            src = img.get_attribute('src')
-            #     self.image_srs_list.append(image.get_attribute('src'))
-            coin_image = urllib.request.urlretrieve(src, '/Users/paddy/Desktop/AiCore/Scraper_Project/Coin_Images/' + str(coin_list[i].find_element_by_xpath('.//td[3]/div/a/div/div/div/p').text) + ".png")
+                        # coin_list = self.individual_coin_path()
+                #self.image_srs_list.append(full_image_list)
+                coin_list = self.individual_coin_path()
+            # img = coin_list[i].find_element_by_class_name('coin-logo')
+            # # for image in img:
+            # src = img.get_attribute('src')
+            # #     self.image_srs_list.append(image.get_attribute('src'))
+            # coin_image = urllib.request.urlretrieve(src, '/Users/paddy/Desktop/AiCore/Scraper_Project/Coin_Images/' + str(coin_list[i].find_element_by_xpath('.//td[3]/div/a/div/div/div/p').text) + ".png")
             #self.save_image_url()
             print(full_coin_list)
             #print(self.image_srs_list)
@@ -109,8 +114,8 @@ class Webscraper:
             
             self.driver.execute_script("window.scrollBy(0, 50)")
             self.save_to_json()
-            #self.save_to_json_image()
-            self.coin_image_completed.extend([coin_image])
+            self.save_to_json_image()
+            self.coin_image_completed.append(full_image_list)
             # self.image_srs_list.append
             if i == 100:
                 #self.save_to_json()
@@ -165,14 +170,14 @@ class Webscraper:
 
     def save_to_json_image(self):
         final_image_list = []
-        for coin in self.image_srs_list:
+        for coin in self.coin_image_completed:
             if coin not in final_image_list:
                 final_image_list.append(coin)
         
-        complete_full_coin_list = final_image_list
-        crypto_json_image = json.dumps(complete_full_coin_list)
+        complete_full_image_list = final_image_list
+        # crypto_json_image = json.dumps(complete_full_coin_list)
         with open('coins_images.json', encoding='utf-8', mode='w') as file:
-            json.dump(crypto_json_image, file, ensure_ascii=False, indent=4)
+            json.dump(complete_full_image_list, file, ensure_ascii=False, indent=4)
 
 
     """
