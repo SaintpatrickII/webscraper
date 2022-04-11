@@ -36,3 +36,7 @@ As the code project had now reached a point whereas it was in a draft version wi
 Now we have a output in the form of a json file with all of our results an aditional testing file could be created to ensure that for future runs any errors could be more easily traced back using the inbuilt unittest module, for the testing of this project we would only initilise a few tests, as more would be created as the project progressed, at the moment these tests checked that all dictionary keys existed, that the json file was a list & that inside of that list dictionaries existed
 
 4. Scalably Storing Data
+
+Images are stored with the cryptocurrencies Symbol as an identifier, originally a method was created that would save the images as a .png file which could be uploaded, however this would create problems in importing to SQL & taking a large amount of time to upload correctly to AWS S3. Instead image data is saved via the images url in a json file.
+
+All data is uploaded to an AWS S3 bucket stored as json files. this data is then connected to an AWS RDS instance via a Boto3 method, from here we can connect to a postgreSQL server to manipulate the data in an SQL format, as for right now the only this to do is to create an inner join which would use the symbol from both data sets to assign the coins image url to its dataset
