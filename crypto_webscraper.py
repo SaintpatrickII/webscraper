@@ -5,13 +5,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 import uuid
 import json
-# import urllib.request
 from selenium.common.exceptions import NoSuchElementException
-# from selenium.common.exceptions import StaleElementReferenceException
 import boto3
-import logging
-# from botocore.exceptions import ClientError
-import os
 import pandas as pd
 from selenium import webdriver 
 import chromedriver_autoinstaller
@@ -147,7 +142,7 @@ class Webscraper:
 
 
     """
-    save_to_json:
+    save_to_json(image):
     
     responsible for ensuring no duplicate 
     results saved as file will rewrite top 1000
@@ -200,6 +195,16 @@ class Cloud_Integration:
             self.s3.upload_fileobj(f, 'patrickcryptobucketfinal', 'coin_images_data.json')
 
 
+    '''
+    Upload's to S3:
+
+    takes from th save to json method,
+    here the saved jsons are uploaded to 
+    an AWS bucket, json files are in 
+    written binary as a normal 'w' upload 
+    would not be applicable here
+    '''
+
     def upload_coin_data(self):
         DATABASE_TYPE = 'postgresql'
         coin_data = '/Users/paddy/Desktop/AiCore/scraper_project/coins.json'
@@ -232,12 +237,37 @@ class Cloud_Integration:
         df_image.to_sql('coin_images', engine, if_exists='replace')
 
 
+    '''
+    Uploads:
+    
+    alike the s3 uploads these two methods also
+    upload our raw local data, in this instance 
+    we have to covert json -> pandas df,
+    to be usable on postresql. We 
+    are utilising sqlalchemy (a sql port 
+    to interact from python to DB's) to send
+    this df to a remote postresql server 
+    maintained through AWS RDS
+    '''
+
+
     def cloud_initiliser(self):
         self.upload_to_s3()
         self.upload_images_to_s3()
         self.upload_coin_data()
         self.upload_coin_images()
         return
+
+
+    '''
+    cloud_initiliser:
+    
+    simply runs all our methods within
+    the cloud integration class in a clean
+    method to avoid any confusion
+    '''
+
+
 
 
 if __name__ == '__main__':
@@ -247,3 +277,12 @@ if __name__ == '__main__':
     cloud_init.cloud_initiliser()
 
 
+'''
+Main initiliser:
+
+the if statement infers 
+that this file is the main file 
+being run instead of importing from 
+a seperate module as this is true it 
+will initilise both our classes & run them 
+sequentially'''
