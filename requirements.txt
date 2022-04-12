@@ -2,3 +2,4 @@ boto3==1.21.22
 pandas==1.4.1
 selenium==4.1.0
 sqlalchemy
+chromedriver-autoinstaller==0.3.1
