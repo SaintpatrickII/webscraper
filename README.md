@@ -7,7 +7,7 @@ Selenium was utilised for automating the webscraper
 
 1. prototyping the webscraper:
 
-before being able to access the website a cokkies iframe had appeared, in the initiliser the webscraper was designed to immediateley click this so that the webpage could be manipulated
+before being able to access the website a cookies iframe had appeared, in the initiliser the webscraper was designed to immediateley click this so that the webpage could be manipulated
 
 The second hurdle in this project was creating a class which could navigate the website & swap inbetween webpages
 two key methods had been tested: scrolling until next element visable and scrolling by a certian pixel amount at this point both were viable options.
@@ -25,7 +25,7 @@ other key information about coins was collected such as their market cap & price
 
 Some coins would have missing attributes such as a missing price, for these a NoSuchElementException was used to skip these results without crashing the webscraper
 
-These details were saved as a json file by creating a write method which used the json.dump() method, here it is important to note a funny setback, whilst attempting to test this json file json.dumps was used unnoticed so all testing methods was attempting to analyse a string object rather than the list of dictionaries intended
+These details were saved as a json file by creating a write method which used the json.dump() method, here it is important to note a funny setback, whilst attempting to test this json file json.dumps was used unnoticed so all testing methods was attempting to analyse a string object rather than the list of dictionaries in json format as intended
 
 Alongside this an additional mothod was used to save the image date for each coin, in this case the urlib import was used & using a combination of the images srs element with a '.png' string each image could be saved as a png within a seperate Coin_Images file.
 
