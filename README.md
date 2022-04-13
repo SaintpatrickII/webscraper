@@ -45,4 +45,25 @@ All data is uploaded to an AWS S3 bucket stored as json files. this data is then
 5. Getting more data
 
 For this section of the project the main aim was to collect a substantial amount of results & ensure no duplicates:
-to collect more data a method was created which would click the next page button at the bottom of the page until the webscraper had reached page 11 then it would kill the webpage. lcuckily for u
+to collect more data a method was created which would click the next page button at the bottom of the page until the webscraper had reached page 11 then the same method responsible for swapping pages would terminate the webpage. As my website involved cryptocurrencies it would be important to get up to date price information everytime i ran the scraper, so each time the scraper runs it rewrites the data collected from the previous instance, this in turn will always mean that no duplicates are attained, the public methods were also updated so that they now inform if both datasets are lists of dictionaries, that the coin information json has the correct keys & that the image url's are consistant.
+
+6. Making the scraping scalable
+
+Here a SQL inner join is used to join both the coin & image data tables together matched by the coins Symbol. Now in order to make the data scalable we would have to install our project on a docker image that could be run & an amazon EC2 instance that could also be run.
+
+In order to begin this first preperations would be needed for the project:
+- Chromedriver was moved to the same directory as our project
+- a Dockerfile was created, this would give docker instructions to read & download requirements, the instructions to download & unzip a google chrome package, update any packages & then to run the correct files
+- All results which were stored in local directories had to have filepaths changed from e.g. 'patrick/project/coin_data.json' to './coin_data.json' this in turn would enable docker to find a existing filepath (docker cannot view local filepaths as it is a disconnected system)
+- In the initiliser of the webscraper an additional headless arguement is used, this allows our project to run without any GUI
+
+Creating the Docker image:
+Dockerhub acount was created & docker was downloaded via the CLI, using sudo commands we are able to login to docker & view all current images, as of right now there are none .
+whilst inside the cd which contains the project, dockerfile & requirements we can now use the docker build command to build our image. Here it is good to note that docker will only build the files that are explicitly mentioned within the Dockerfile within the project.
+Another key feature to note is that when building the image the -t (tag) arguement is used to name the docker image, this is important as later on when we attempt to pull the Docker image, we will only be able to pull images that begin with our username i.e. myname/scraperproject.
+now that the image is built we can log into to our docker account in the CLI & using 'sudo docker run -it myname/scraperproject' can run the webscraper within docker headless.
+
+Running the scraper via EC2:
+Alike running our scraper via docker this involves not running the project locally, in this context we are now running the scraper using an AWS EC2 instance (using AWS virtual servers). in order to do this first we setup a free tier EC2 instance, gain our keypair which must be chmod 400 encrypted. we can then using the CLI paste our instance via its public DNS, which will detect our encrypted keypair & allow access to the instance. from here we can just sudo login to our docker account and alike before, pull our docker image to be run on the ec2 instance :)
+
+
