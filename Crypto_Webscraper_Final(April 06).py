@@ -8,19 +8,34 @@ import json
 import urllib.request
 from selenium.common.exceptions import NoSuchElementException
 import boto3
+from sqlalchemy import create_engine
 import logging
 import os
+import pandas as pd
+import tempfile
 
 class Webscraper:
     def __init__(self):
         self.link_list = []
         self.coin_image_completed = []
-        self.image_srs_list = []
-        self.driver = webdriver.Chrome('/Users/paddy/Downloads/chromedriver')
+        self.friendly_id_list = []
+        self.final_coin_details=[]
+        self.driver = webdriver.Chrome('/Users/paddy/Desktop/AiCore/scraper_project/chromedriver')
         self.driver.get('https://coinmarketcap.com/')
         self.url = 'https://coinmarketcap.com/'
         self.next_page_string = '?page='
-        
+        DATABASE_TYPE = 'postgresql'
+        DBAPI = 'psycopg2'
+        ENDPOINT = 'patrickcryptodbfinal.cycquey1wjft.us-east-1.rds.amazonaws.com' # Change it for your AWS endpoint please:)
+        USER = 'postgres'
+        PASSWORD = 'postgres'
+        PORT = 5432
+        DATABASE = 'postgres'
+        self.engine = create_engine(f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{ENDPOINT}:{PORT}/{DATABASE}")
+        self.client = boto3.client('s3')
+        self.df = pd.read_sql_table('coin_data', self.engine)
+        self.id_checker = list(self.df['friendly_id']) 
+
         WebDriverWait(self.driver, 20).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "div.cmc-cookie-policy-banner__close"))).click()
         sleep(10)
 
@@ -72,19 +87,36 @@ class Webscraper:
                 }
             except NoSuchElementException:
                     continue
-            if coin_list[i] in full_coin_list.values():
-                continue
+            friendly_id_con = coin_list[i].find_element_by_xpath('.//td[3]/div/a')
+            friendly_id = friendly_id_con.get_attribute('href')
+            friendly_id_split = friendly_id.split('/')[-2]
+            self.friendly_id_list.append(friendly_id_split)
             img = coin_list[i].find_element_by_class_name('coin-logo')
             src = img.get_attribute('src')
-            coin_image = urllib.request.urlretrieve(src, '/Users/paddy/Desktop/AiCore/Scraper_Project/Coin_Images/' + str(coin_list[i].find_element_by_xpath('.//td[3]/div/a/div/div/div/p').text) + ".png")
-            print(full_coin_list)
-            self.link_list.append(full_coin_list)
+            full_coin_list['image'] = src
+            full_coin_list['friendly_id'] = friendly_id_split
             coin_list = self.individual_coin_path()
+            print(full_coin_list)
             self.driver.execute_script("window.scrollBy(0, 50)")
-            self.save_to_json()
-            self.coin_image_completed.extend([coin_image])
+            if friendly_id in self.friendly_id_list:
+                continue
+            else:
+                #self.link_list.append(full_coin_list)
+                self.final_coin_details.append(full_coin_list)
+                # self.save_to_json_final()
+
+                # self.coin_image_completed.extend([src])
+                # self.save_to_json_image()
             if i == 100:
+                self.save_to_json_final()
                 return full_coin_list()
+            
+
+
+
+
+
+
 
 
     """
@@ -97,27 +129,38 @@ class Webscraper:
     """
 
 
-    def save_to_json(self):
-        final_coin_list = []
-        for coin in self.link_list:
-            if coin not in final_coin_list:
-                final_coin_list.append(coin)
+    # def save_to_json(self):
+    #     final_coin_list = []
+    #     for coin in self.link_list:
+    #         if coin not in final_coin_list:
+    #             final_coin_list.append(coin)
         
-        complete_full_coin_list = final_coin_list
-        with open('coins.json', encoding='utf-8', mode='w') as file:
-            json.dump(complete_full_coin_list, file, ensure_ascii=False, indent=4)
+    #     complete_full_coin_list = final_coin_list
+    #     with open('coins2.json', encoding='utf-8', mode='w') as file:
+    #         json.dump(complete_full_coin_list, file, ensure_ascii=False, indent=4)
 
 
-    def save_to_json_image(self):
-        final_image_list = []
-        for coin in self.image_srs_list:
-            if coin not in final_image_list:
-                final_image_list.append(coin)
+    def save_to_json_final(self):
+            final_coin_list = []
+            for coin in self.final_coin_details:
+                if coin not in final_coin_list:
+                    final_coin_list.append(coin)
+            
+            complete_full_coin_list = final_coin_list
+            with open('coins_data.json', encoding='utf-8', mode='w') as file:
+                json.dump(complete_full_coin_list, file, ensure_ascii=False, indent=4)
+
+
+    # def save_to_json_image(self):
+    #     final_image_list = []
+    #     for coin in self.coin_image_completed:
+    #         if coin not in final_image_list:
+    #             final_image_list.append(coin)
         
-        complete_full_coin_list = final_image_list
-        crypto_json_image = json.dumps(complete_full_coin_list)
-        with open('coins_images.json', encoding='utf-8', mode='w') as file:
-            json.dump(crypto_json_image, file, ensure_ascii=False, indent=4)
+    #     complete_full_coin_list = final_image_list
+    #     crypto_json_image = json.dumps(complete_full_coin_list)
+    #     with open('coins_images.json', encoding='utf-8', mode='w') as file:
+    #         json.dump(crypto_json_image, file, ensure_ascii=False, indent=4)
 
 
     """
@@ -141,7 +184,7 @@ class Webscraper:
             next_page_button.click()
             page += 1
             if page == no_of_pages:
-                self.save_to_json()
+                # self.save_to_json()
                 return 
 
 
@@ -157,7 +200,44 @@ class Webscraper:
     input: no_of_pages = int
     """
 
+    def split_image_url(self):
+        self.image_link = []
+        self.image_uuid = []
+        for j in self.final_coin_details:
+            dict_values = j.values()
+            v_image_link = list(dict_values)[7]
+            v_uuid = list(dict_values)[0]
+            self.image_link.append(v_image_link)
+            self.image_uuid.append(v_uuid)
+        print(self.image_link)
+        print(self.image_uuid)
+        # return self.image_details
+
+
+
+
+
+    def upload_image_jpeg(self):
+        self.split_image_url()
+        v_image_link = self.image_link
+        v_uuid= self.image_uuid
+        with tempfile.TemporaryDirectory() as tmpdict:
+            for i in range(len(self.image_link)):
+                urllib.request.urlretrieve(v_image_link[i], tmpdict + f'{v_uuid[i]}.jpg')
+                self.client.upload_file(tmpdict + f'{v_uuid[i]}.jpg', 'patrickcryptobucketfinal', f'{v_uuid[i]}.jpg')
+            return
+
+
+    def data_to_sql(self):
+        df_coins = pd.DataFrame(self.final_coin_details)
+        df_coins.to_sql('coin_data', con=self.engine, if_exists='append', index=False)
+
+
+
 
 if __name__ == '__main__':
     public_webscraper = Webscraper()
-    public_webscraper.page_iterator(11)
+    public_webscraper.page_iterator(2)
+    public_webscraper.upload_image_jpeg()
+    public_webscraper.save_to_json_final()
+    public_webscraper.data_to_sql()
