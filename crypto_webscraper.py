@@ -12,21 +12,41 @@ from selenium import webdriver
 import chromedriver_autoinstaller
 from selenium.webdriver.chrome.options import Options
 from sqlalchemy import create_engine
+import os
+import urllib.request
+import tempfile
 
 class Webscraper:
     def __init__(self):
         self.link_list = []
         self.coin_image_completed = []
+        self.friendly_id_list = []
+        self.final_coin_details=[]
         self.webdriver_installer = chromedriver_autoinstaller.install()
         chrome_options = Options()
         chrome_options.add_argument('--headless')
-        self.image_srs_list = []
-        self.driver = webdriver.Chrome('/Users/paddy/Desktop/AiCore/scraper_project/chromedriver')
-        #self.driver = webdriver.Chrome(chrome_options=chrome_options)
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-gpu")
+        chrome_options.add_argument("--window-size=800,600")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+        #self.driver = webdriver.Chrome('/Users/paddy/Desktop/AiCore/scraper_project/chromedriver')
+        self.driver = webdriver.Chrome(chrome_options=chrome_options)
         self.driver.get('https://coinmarketcap.com/')
         self.url = 'https://coinmarketcap.com/'
         self.next_page_string = '?page='
-        
+        DATABASE_TYPE = 'postgresql'
+        DBAPI = 'psycopg2'
+        ENDPOINT = 'patrickcryptodbfinal.cycquey1wjft.us-east-1.rds.amazonaws.com' 
+        USER =  'postgres'
+        PASSWORD = 'postgres'
+        PORT = 5432
+        DATABASE = 'postgres'
+        self.engine = create_engine(f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{ENDPOINT}:{PORT}/{DATABASE}")
+        self.client = boto3.client('s3')
+        self.df = pd.read_sql_table('coin_data', self.engine)
+        self.id_checker = list(self.df['friendly_id']) 
+
+
         WebDriverWait(self.driver, 20).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "div.cmc-cookie-policy-banner__close"))).click()
         sleep(10)
 
@@ -35,10 +55,10 @@ class Webscraper:
     
     defines driver local location, creates
     empty lists to be used in webscraper &
-    defines website to be webscraped, also
-    clicks cookie banner, headless arguement added
-    as well as commented out self.driver, this is to 
-    be swapped when creating docker image 
+    defines website to be webscraped, initilises 
+    sqlalchemy engine for RDS transfer & sets up
+    friendly_id to ensure no rescraping of data, 
+    also clicks cookie banner
     """
     
     
@@ -77,77 +97,56 @@ class Webscraper:
                     'Market_cap' : coin_list[i].find_element_by_xpath('.//td//p/span[2]').text,
                     'Circulating_Supply' : coin_list[i].find_element_by_xpath('.//td[9]//div/div[1]/p').text
                 }
-                img = coin_list[i].find_element_by_class_name('coin-logo')
-                full_image_list = {
-                        'uuid' : str(uuid.uuid4()),
-                        'Name': coin_list[i].find_element_by_xpath('.//td[3]//a//p').text,
-                        'Image' : img.get_attribute('src')
-                        }
             except NoSuchElementException:
                     continue
-            
+            friendly_id_con = coin_list[i].find_element_by_xpath('.//td[3]/div/a')
+            friendly_id = friendly_id_con.get_attribute('href')
+            friendly_id_split = friendly_id.split('/')[-2]
+            self.friendly_id_list.append(friendly_id_split)
+            img = coin_list[i].find_element_by_class_name('coin-logo')
+            src = img.get_attribute('src')
+            full_coin_list['image'] = src
+            full_coin_list['friendly_id'] = friendly_id_split
             coin_list = self.individual_coin_path()
-            # img = coin_list[i].find_element_by_class_name('coin-logo')
-            # # for image in img:
-            # src = img.get_attribute('src')
-            # #     self.image_srs_list.append(image.get_attribute('src'))
-            # coin_image = urllib.request.urlretrieve(src, '/Users/paddy/Desktop/AiCore/Scraper_Project/Coin_Images/' + str(coin_list[i].find_element_by_xpath('.//td[3]/div/a/div/div/div/p').text) + ".png")
-            #self.save_image_url()
             print(full_coin_list)
-            #print(self.image_srs_list)
-            self.link_list.append(full_coin_list)
-            coin_list = self.individual_coin_path()
-            #image_scraper = self.save_image_url()
             self.driver.execute_script("window.scrollBy(0, 50)")
-            self.save_to_json()
-            self.save_to_json_image()
-            self.coin_image_completed.append(full_image_list)
-            # self.image_srs_list.append
+            if friendly_id in self.friendly_id_list:
+                continue
+            else:
+                self.final_coin_details.append(full_coin_list)
             if i == 100:
+                self.save_to_json_final()
                 return full_coin_list()
-
+            
 
     """
     crypto_properties:
     
-    main bulk of webscraper, this scrapes
-    all items from each coin i.e. images &
-    attributes alongside scrolling the 
-    webscraper to the bottom of each page,
-    commented out lines used if raw .png 
-    files want to be saved locally
+    this sets up the dictionary with all of 
+    the coins attributes, also is responsible for 
+    setting the friendly id to stop rescraping
+    & scrolls the page as the scraper collects
+    results
     """
 
 
-    def save_to_json(self):
-        final_coin_list = []
-        for coin in self.link_list:
-            if coin not in final_coin_list:
-                final_coin_list.append(coin)
-        
-        complete_full_coin_list = final_coin_list
-        with open('coins.json', encoding='utf-8', mode='w') as file:
-            json.dump(complete_full_coin_list, file, ensure_ascii=False, indent=4)
-
-
-    def save_to_json_image(self):
-        final_image_list = []
-        for coin in self.coin_image_completed:
-            if coin not in final_image_list:
-                final_image_list.append(coin)
-        
-        complete_full_image_list = final_image_list
-        with open('coins_images.json', encoding='utf-8', mode='w') as file:
-            json.dump(complete_full_image_list, file, ensure_ascii=False, indent=4)
+    def save_to_json_final(self):
+            final_coin_list = []
+            for coin in self.final_coin_details:
+                if coin not in final_coin_list:
+                    final_coin_list.append(coin)
+            
+            complete_full_coin_list = final_coin_list
+            with open('coins_data.json', encoding='utf-8', mode='w') as file:
+                json.dump(complete_full_coin_list, file, ensure_ascii=False, indent=4)
 
 
     """
-    save_to_json(image):
+    save_to_json:
     
     responsible for ensuring no duplicate 
-    results saved as file will rewrite top 1000
-    coins & all coins saved to
-    easy to read json format via json.dump
+    results saved & all coins saved to
+    easy to read json format
     """
 
 
@@ -163,7 +162,6 @@ class Webscraper:
             next_page_button.click()
             page += 1
             if page == no_of_pages:
-                self.save_to_json()
                 return 
 
 
@@ -179,110 +177,76 @@ class Webscraper:
     input: no_of_pages = int
     """
 
-
-class Cloud_Integration:
-    def __init__(self):
-        self.s3 = boto3.client('s3')
-        self.coin_data = '/Users/paddy/Desktop/AiCore/scraper_project/coins.json'
-
-    def upload_to_s3(self):
-        with open('/Users/paddy/Desktop/AiCore/scraper_project/coins.json', 'rb') as f:
-            self.s3.upload_fileobj(f, 'patrickcryptobucketfinal', 'coin_data.json')
-
-
-    def upload_images_to_s3(self):
-        with open('/Users/paddy/Desktop/AiCore/scraper_project/coins_images.json', 'rb') as f:
-            self.s3.upload_fileobj(f, 'patrickcryptobucketfinal', 'coin_images_data.json')
+    def split_image_url(self):
+        self.image_link = []
+        self.image_uuid = []
+        for j in self.final_coin_details:
+            dict_values = j.values()
+            v_image_link = list(dict_values)[7]
+            v_uuid = list(dict_values)[0]
+            self.image_link.append(v_image_link)
+            self.image_uuid.append(v_uuid)
+        print(self.image_link)
+        print(self.image_uuid)
 
 
     '''
-    Upload's to S3:
-
-    takes from th save to json method,
-    here the saved jsons are uploaded to 
-    an AWS bucket, json files are in 
-    written binary as a normal 'w' upload 
-    would not be applicable here
-    '''
-
-    def upload_coin_data(self):
-        DATABASE_TYPE = 'postgresql'
-        coin_data = '/Users/paddy/Desktop/AiCore/scraper_project/coins.json'
-        df = pd.read_json(coin_data)
-        DBAPI = 'psycopg2'
-        ENDPOINT = 'patrickcryptodbfinal.cycquey1wjft.us-east-1.rds.amazonaws.com' # Change it for your AWS endpoint
-        USER = 'postgres'
-        PASSWORD = 'postgres'
-        PORT = 5432
-        DATABASE = 'postgres'
-        engine = create_engine(f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{ENDPOINT}:{PORT}/{DATABASE}")
-        engine.connect()
-
-        df.to_sql('coin_data', engine, if_exists='replace')
-
-
-    def upload_coin_images(self):
-        coins_images = '/Users/paddy/Desktop/AiCore/scraper_project/coins_images.json'
-        df_image = pd.read_json(coins_images)
-        DATABASE_TYPE = 'postgresql'
-        DBAPI = 'psycopg2'
-        ENDPOINT = 'patrickcryptodbfinal.cycquey1wjft.us-east-1.rds.amazonaws.com' # Change it for your AWS endpoint
-        USER = 'postgres'
-        PASSWORD = 'postgres'
-        PORT = 5432
-        DATABASE = 'postgres'
-        engine = create_engine(f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{ENDPOINT}:{PORT}/{DATABASE}")
-        engine.connect()
-
-        df_image.to_sql('coin_images', engine, if_exists='replace')
-
-
-    '''
-    Uploads:
+    Split_image_url:
     
-    alike the s3 uploads these two methods also
-    upload our raw local data, in this instance 
-    we have to covert json -> pandas df,
-    to be usable on postresql. We 
-    are utilising sqlalchemy (a sql port 
-    to interact from python to DB's) to send
-    this df to a remote postresql server 
-    maintained through AWS RDS
-    '''
+    This method collects the image
+    url from the saved json object &
+    formats it to be uploaded to the s3 bucket'''
 
 
-    def cloud_initiliser(self):
-        self.upload_to_s3()
-        self.upload_images_to_s3()
-        self.upload_coin_data()
-        self.upload_coin_images()
-        return
+    def upload_image_jpeg(self):
+        self.split_image_url()
+        v_image_link = self.image_link
+        v_uuid= self.image_uuid
+        with tempfile.TemporaryDirectory() as tmpdict:
+            for i in range(len(self.image_link)):
+                urllib.request.urlretrieve(v_image_link[i], tmpdict + f'{v_uuid[i]}.jpg')
+                self.client.upload_file(tmpdict + f'{v_uuid[i]}.jpg', 'patrickcryptobucketfinal', f'{v_uuid[i]}.jpg')
+            return
 
 
     '''
-    cloud_initiliser:
+    upload_image_jpeg:
+
+    Using a temporary dictionary,
+    iterates throught the image url's 
+    sending them to the AWS S3 bucket in
+    jpeg format labelled with the same
+    uuid as the json data belonging to that coin 
+    '''
     
-    simply runs all our methods within
-    the cloud integration class in a clean
-    method to avoid any confusion
+    
+    def data_to_sql(self):
+        df_coins = pd.DataFrame(self.final_coin_details)
+        df_coins.to_sql('coin_data', con=self.engine, if_exists='append', index=False)
+
     '''
-
-
+    data_to_sql:
+    
+    turns json into pandas df &
+    imports that to postresql
+    '''
 
 
 if __name__ == '__main__':
     public_webscraper = Webscraper()
-    public_webscraper.page_iterator(11)
-    cloud_init = Cloud_Integration()
-    cloud_init.cloud_initiliser()
+    public_webscraper.page_iterator(2)
+    public_webscraper.upload_image_jpeg()
+    public_webscraper.save_to_json_final()
+    public_webscraper.data_to_sql()
 
 
-'''
-Main initiliser:
+    '''
+    Main initiliser:
 
-the if statement infers 
-that this file is the main file 
-being run instead of importing from 
-a seperate module as this is true it 
-will initilise both our classes & run them 
-sequentially'''
+    the if statement infers 
+    that this file is the main file 
+    being run instead of importing from 
+    a seperate module as this is true it 
+    will initilise both our classes & run them 
+    sequentially
+    '''
