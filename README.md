@@ -9,12 +9,12 @@
 
 2. prototyping the webscraper:
 
--Before being able to access the website a cookies iframe had appeared, in the initiliser the webscraper was designed to immediateley click this so that the webpage could be manipulated
+- Before being able to access the website a cookies iframe had appeared, in the initiliser the webscraper was designed to immediateley click this so that the webpage could be manipulated
 
 - The second hurdle in this project was creating a class which could navigate the website & swap inbetween webpages
 two key methods had been tested: scrolling until next element visable and scrolling by a certian pixel amount at this point both were viable options.
 
-In order to swap pages the webscraper also had to be able to have the next page button visable before attempting to click it.
+- In order to swap pages the webscraper also had to be able to have the next page button visable before attempting to click it.
 
 
 3. Retrieving details
