@@ -2,7 +2,7 @@ FROM python:3.8
 
 COPY . .
 
-RUN pip install -r requirements.txt
+RUN PYTHONPATH=/usr/bin/python pip install -r requirements.txt
 
 RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add 
 
