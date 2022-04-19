@@ -56,7 +56,12 @@ other key information about coins was collected such as their market cap & price
 6. Getting more data
 
 For this section of the project the main aim was to collect a substantial amount of results & ensure no duplicates:
-to collect more data a method was created which would click the next page button at the bottom of the page until the webscraper had reached page 11 then the same method responsible for swapping pages would terminate the webpage. As my website involved cryptocurrencies it would be important to get up to date price information everytime i ran the scraper, so each time the scraper runs it rewrites the data collected from the previous instance, this in turn will always mean that no duplicates are attained, the public methods were also updated so that they now inform if both datasets are lists of dictionaries, that the coin information json has the correct keys & that the image url's are consistant.
+
+- To collect more data a method was created which would click the next page button at the bottom of the page until the webscraper had reached page 11 then the same method responsible for swapping pages would terminate the webpage. 
+
+- Each coin from coinmarketcap had a unique ID with the coin name attatched to the end, by extracting this as a string and splitting the string so just the coin name was used as a friendly ID i could store this & adapt my scraping method so that if this name appeared the scraper would not scrape this already known data
+
+- As the image data was also attatched in this loop when the Friendly ID was found it would lso prevent the image data being scraped too
 
 
 7. Making the scraping scalable
