@@ -164,6 +164,7 @@ class Webscraper:
             sleep(3)
             next_page_button.click()
             page += 1
+            print(f'page {page} is completed')
             if page == no_of_pages:
                 return 
 
