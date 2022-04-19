@@ -106,12 +106,26 @@ prom/prometheus \
 
 - This will allow for prometheus connections, to finish this we restart the docker image & pasting the ip used to connect prometheus into the search bar can check to see if our EC2 is connected
 
+This prometheus connection is now connected to Grafana (a open source analytics engine), from here a dashboard is created, for my project i had chose to create graphs to monitor:
 
+- Query duration
+
+- Website http response size
+
+- Container action size
+
+- Engine health
 
 9. CI/CD
 
 
-As learnt previously it takes quite a while to update docker images with code changes
+As learnt previously it takes quite a while to update docker images with code changes, time to streamline this using CI/CD!
+
+- Firstly Github secrets are made, these credentials will mean that whenever we push new changes to github (and so the docker image) we won't have to enter credentials everytime, these secrets are inaccesible to anyone after creation & are stored on the projects repository
+
+- A Github action is created, github provides templates for these actions, a basic one is used this will automate updates to the docker image everytime the repository is updated & push it to dockerhub for usage on the EC2 Instance
+
+- The very final objective of this project is to have the scraper run automatically, for my scraper I used cronjobs within my EC2 instance to have the webscraper run daily at 10am without user input, from this my grafana dashboard can be checked to ensure that the webscraper ran correctly
 
 
 
