@@ -49,11 +49,11 @@
 
 6. Getting more data 
 
--For this section of the project the main aim was to collect a substantial amount of results & ensure no duplicates: 
+For this section of the project the main aim was to collect a substantial amount of results & ensure no duplicates: 
 
 - To collect more data, a method was created which would click the next page button at the bottom of the page until the webscraper had reached page 11; then, the same method responsible for swapping pages would terminate the webpage. 
 
--Each coin from coinmarketcap had a unique ID with the coin name attached to the end. By extracting this as a string and splitting the string so just the coin name was used as a friendly ID, I could store this & adapt my scraping method so that if this name appeared the scraper would not scrape this already 
+- Each coin from coinmarketcap had a unique ID with the coin name attached to the end. By extracting this as a string and splitting the string so just the coin name was used as a friendly ID, I could store this & adapt my scraping method so that if this name appeared the scraper would not scrape this already 
 known data 
 
 - As the image data was also attached in this loop when the Friendly ID was found it would also prevent the image data from being scraped too 
