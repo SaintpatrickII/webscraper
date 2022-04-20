@@ -12,7 +12,6 @@ from selenium import webdriver
 import chromedriver_autoinstaller
 from selenium.webdriver.chrome.options import Options
 from sqlalchemy import create_engine
-import os
 import urllib.request
 import tempfile
 
@@ -225,14 +224,23 @@ class Webscraper:
     
     
     def data_to_sql(self):
-        df_coins = pd.DataFrame(self.final_coin_details)
-        df_coins.to_sql('coin_data', con=self.engine, if_exists='append', index=False)
-
+        with open('./coins_data.json', 'r') as filename:
+            df_coins = json.load(filename)
+        df = pd.DataFrame(df_coins)
+        df.columns = df.columns.str.lower()
+        self.engine.connect()
+        df.to_sql('coin_data', con=self.engine, if_exists='replace')
+        pd.read_sql_query('''SELECT DISTINCT coin_data.Name From coin_data;''', self.engine)
+        print('duplicate values have been removed')
+        
+        
     '''
     data_to_sql:
     
     turns json into pandas df &
-    imports that to postresql
+    imports that to postresql, checks 
+    with postresql that no duplicates exist using DISTINCT
+    SQL function
     '''
 
 

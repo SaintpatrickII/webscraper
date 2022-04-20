@@ -195,7 +195,7 @@ class Webscraper:
             for i in range(len(self.image_link)):
                 urllib.request.urlretrieve(v_image_link[i], tmpdict + f'{v_uuid[i]}.jpg')
                 self.client.upload_file(tmpdict + f'{v_uuid[i]}.jpg', 'patrickcryptobucketfinal', f'{v_uuid[i]}.jpg')
-            return
+            return print('images have been uploaded to S3')
 
 
     '''
@@ -210,14 +210,23 @@ class Webscraper:
     
     
     def data_to_sql(self):
-        df_coins = pd.DataFrame(self.final_coin_details)
-        df_coins.to_sql('coin_data', con=self.engine, if_exists='append', index=False)
+        with open('./coins_data.json', 'r') as filename:
+            df_coins = json.load(filename)
+        df = pd.DataFrame(df_coins)
+        df.columns = df.columns.str.lower()
+        self.engine.connect()
+        df.to_sql('coin_data', con=self.engine, if_exists='replace')
+        pd.read_sql_query('''SELECT DISTINCT coin_data.Name From coin_data;''', self.engine)
+        print('duplicate values have been removed')
+        
 
     '''
     data_to_sql:
     
     turns json into pandas df &
-    imports that to postresql
+    imports that to postresql, checks 
+    with postresql that no duplicates exist using DISTINCT
+    SQL function
     '''
 
 
@@ -227,6 +236,7 @@ if __name__ == '__main__':
     public_webscraper.upload_image_jpeg()
     public_webscraper.save_to_json_final()
     public_webscraper.data_to_sql()
+    print('scraper has finished')
 
 
     '''
