@@ -1,11 +1,11 @@
-1.Hello World 
+1. Hello World 
 
 - The initial step of this project was to select a website to base this webscraper on. I have had a longstanding interest with cryptocurrency so I decided to use this as my base 
 
 - One of (if not the largest) tracking websites of cryptocurrencies, is coinmarketcap.com. For this project, then, I will be scraping data off their website by building a framework which can scalably store this data & run a virtual version of my scraper :) 
 
 
-2.Prototyping the webscraper 
+2. Prototyping the webscraper 
 
 - Before being able to access the website, a cookies iframe had appeared. In the initializer the webscraper was designed to immediately click this so that the webpage could then begin to be manipulated. 
 
@@ -38,7 +38,7 @@
 -For the testing of this project we would only initialize a few tests as more would be created as the project progressed; at the moment these tests checked that all dictionary keys existed, that the json file was a list & that inside of that list dictionaries existed 
 
 
-5.Scalably Storing Data 
+5. Scalably Storing Data 
 
 - Images are stored with the cryptocurrencies’ Symbol as an identifier. Originally a method was created that would save the images as a .png file LOCALLY which could be uploaded, however this would create problems in importing to SQL & taking a large amount of time to upload correctly to AWS S3. Instead, image data is saved via the images & then appended to our main coins_data.json file. 
 
@@ -60,6 +60,8 @@ known data
 
 
 7. Making the scraping scalable 
+
+- Beforehand the only way to ensure no duplicate results was through a friendly-ID,  a connection the our RDS is established & using sqlalchemy and psycopg2 scraped data can be compared against data on the RDS & a SQL command is used to only allow DISTINCT results to be recorded (unique results)
 
 - Now in order to make the data scalable we would have to install our project on a docker image that could be run & an amazon EC2 instance that could also be run. 
 
