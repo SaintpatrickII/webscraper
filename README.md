@@ -44,7 +44,7 @@
 
 - A method was created which could then later separate this data into a list of the image urls; from here, we used the urlib import to save the images .jpg associated with the image url. Instead of saving the images locally, a temporary dictionary was used to transform the image url's to .jpeg & immediately send the images to the AWS S3 bucket without saving them locally 
 
--All coin information data was uploaded to an AWS S3 bucket stored as a json file. This data was then connected to an AWS RDS instance via a Boto3 method combined with turning the json file into a pandas dataframe – from here we can connect to a postgreSQL server to manipulate the data in an SQL format. 
+- All coin information data was uploaded to an AWS S3 bucket stored as a json file. This data was then connected to an AWS RDS instance via a Boto3 method combined with turning the json file into a pandas dataframe – from here we can connect to a postgreSQL server to manipulate the data in an SQL format. 
 
 
 6. Getting more data 
