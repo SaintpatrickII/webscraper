@@ -35,7 +35,7 @@
 
 - Now we had an output in the form of a json file with all of our results, an additional testing file could be created to ensure that for future runs any errors could be more easily traced back using the inbuilt unittest module. 
 
--For the testing of this project we would only initialize a few tests as more would be created as the project progressed; at the moment these tests checked that all dictionary keys existed, that the json file was a list & that inside of that list dictionaries existed 
+- For the testing of this project we would only initialize a few tests as more would be created as the project progressed; at the moment these tests checked that all dictionary keys existed, that the json file was a list & that inside of that list dictionaries existed 
 
 
 5. Scalably Storing Data 
